@@ -1,30 +1,59 @@
-var randoms = [];
-for (var i = 0; i < 50000; i++) {
-  randoms.push(Math.random());
-}
-var numSort = function (a,b) {
-  return a-b;
+var size = 2000;
+
+function rNumSort (a,b) {
+  if (a=== undefined || b===undefined)
+    return 0;
+  return b.key - a.key;
 }
 
-var tArray;
-function sortTest() {
-  tArray = [];
-  
-  for (var i = 0; i < 500; i++) {
-    tArray.push(randoms[i]);
-    if (randoms[i] < 0.1) {
-      tArray.sort(numSort);
-    }
+function benchArray() {
+  var sarray = new SortedArray(rNumSort);
+  var i = size, j = size;
+  while (j--) {
+    sarray.add({key:Math.random(), payload:"bytes"});
+  }
+  while (i--) {
+    sarray.pop();
   }
 }
 
-function lnTest() {
-  tArray = new SortedArray(numSort);
-  
-  for (var i = 0; i < 500; i++) {
-    tArray.add(randoms[i]);
+function benchLazyArray() {
+  var sarray = new LazySortedArray(rNumSort);
+  var i = size, j = size;
+  while (j--) {
+    sarray.add({key:Math.random(), payload:"bytes"});
+  }
+  while (i--) {
+    sarray.pop();
   }
 }
 
-JSLitmus.test("sort", sortTest);
-JSLitmus.test("sortedInsert", lnTest);
+function pbenchArray() {
+  var sarray = new SortedArray(rNumSort);
+  var i = size*2, rnd;
+  while (i--) {
+    rnd = Math.random();
+    if (rnd > (i/(size*2)))
+      sarray.add({key:rnd, payload:"bytes"});
+    else
+      sarray.pop();
+  }
+}
+
+function pbenchLazyArray() {
+  var sarray = new LazySortedArray(rNumSort);
+  var i = size*2, rnd;
+  while (i--) {
+    rnd = Math.random();
+    if (rnd > (i/(size*2)))
+      sarray.add({key:rnd, payload:"bytes"});
+    else
+      sarray.pop();
+  }
+}
+
+JSLitmus.test("SortedArray", benchArray);
+JSLitmus.test("LazySortedArray", benchLazyArray);
+
+JSLitmus.test("SortedArray Probalistic", pbenchArray);
+JSLitmus.test("LazySortedArray Probalistic", pbenchLazyArray);
